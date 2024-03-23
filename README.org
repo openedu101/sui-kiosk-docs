@@ -1,0 +1,322 @@
+#+TITLE: Sui Protocol | Practice | Kiosk
+#+AUTHOR: Dang Quang Vu
+#+EMAIL: jayden.dangvu@gmail.com
+#+SETUPFILE: ~/theme-readtheorg.setup
+#+HTML_HEAD: <style>pre.src{background:#343131;color:white;} </style>
+
+* About My Self
+#+begin_quote
++ Đặng Quang Vũ
++ Founder Openedu101.com
++ Head of Faculty VBI & Blockchain Technical Lead GFI
++ 7+ Years of experience: web3, blockchain, smartcontract
++ Worked with: EVM, Solana, NEAR, Sui, Cosmos, Polkadot, Zero Knowledge Proof - ZKP
+#+end_quote
+
+* Collectibles on Sui
+- Non-Fungibility
+- Onwership
+- Stored Data
+- Transfer Rules - Royalties - Kiosk + TransferPolicy
+
+* What you will receive in this Workshop session?
+- Có thể niêm yết một món đồ trên thị trường và vẫn tiếp tục sử dụng nó được không?
+- Có cách nào để tạo một "safe" an toàn để lưu trữ các vật phẩm sưu tầm không?
+- Chúng ta có thể xây dựng một hệ thống áp dụng các logic tùy chỉnh để liên kết các "an toàn" lại với nhau không?
+- Làm cách nào để đảm bảo lợi ích cho các nhà sáng tạo và tiền bản quyền của họ?
+- Chúng ta có thể thiết kế hệ thống phi tập trung để tránh việc quyền kiểm soát rơi vào một đơn vị duy nhất không?
+- Làm thế nào để đảm bảo về mặt bảo mật và độ tin cậy cho hệ thống?
+
+* First Throughts
+- Shared Object
+- Stores Collectibles as dynamic fields
+- Có chủ sở hữu hợp lệ  + có khả năng quản lý
+- Chủ sở hữu có thể "niêm yết" + bất kỳ ai cũng có thể mang Coin đến và "mua"
+- has a single owner
+- ... Like a mini-store
+
+* Roles: Three sides of a coin
+- Seller lists
+- Buyer purchases and follow the policy
+- Creator create the policy
+
+* How to define policy
+#+begin_src move
+transfer::transfer() // can albe to custom policy
+transfer::public_transfer() // non-policy
+#+end_src
+
+* Kiosk API
+** Create and Manager
+*** New
+- Return: Shared object Kiosk
+- KioskOnwerCap: Owned by creator
+#+begin_src move
+/// Creates a new `Kiosk` with a matching `KioskOwnerCap`.
+public fun new(ctx: &mut TxContext): (Kiosk, KioskOwnerCap) {
+    let kiosk = Kiosk {
+        id: object::new(ctx),
+        profits: balance::zero(),
+        owner: sender(ctx),
+        item_count: 0,
+        allow_extensions: false
+
+        let cap = KioskOwnerCap {
+        id: object::new(ctx),
+        `for`: object::id(&kiosk)
+
+        (kiosk, cap)
+}
+#+end_src
+
+*** Place
+#+begin_src move
+/// Place any object into a Kiosk.
+/// Performs an authorization check to make sure only owner can do that.
+public fun place<T: key + store>(self: &mut Kiosk, cap: &KioskOwnerCap, item: T) {
+    assert!(has_access(self, cap), ENotOwner);
+    place_internal(self, item)
+}
+#+end_src
+
+*** Take
+#+begin_src move
+/// Take any object from the Kiosk.
+/// Performs an authorization check to make sure only owner can do that.
+public fun take<T: key + store>(self: &mut Kiosk, cap: &KioskOwnerCap, id: ID): T {
+    assert!(has_access(self, cap), ENotOwner);
+    assert!(!is_locked(self, id), EItemLocked);
+    assert!(!is_listed_exclusively(self, id), EListedExclusively);
+    assert!(has_item(self, id), EItemNotFound);
+
+    self.item_count = self.item_count - 1;
+    df::remove_if_exists<Listing, u64>(&mut self.id, Listing { id, is_exclusive: false });
+    dof::remove(&mut self.id, Item { id })
+}
+#+end_src
+
+*** Lock
+#+begin_src move
+/// Place an item to the `Kiosk` and issue a `Lock` for it. Once placed this
+/// way, an item can only be listed either with a `list` function or with a
+/// `list_with_purchase_cap`.
+///
+/// Requires policy for `T` to make sure that there's an issued `TransferPolicy`
+/// and the item can be sold, otherwise the asset might be locked forever.
+public fun lock<T: key + store>(
+    self: &mut Kiosk, cap: &KioskOwnerCap, _policy: &TransferPolicy<T>, item: T
+) {
+    assert!(has_access(self, cap), ENotOwner);
+    lock_internal(self, item)
+}
+#+end_src
+
+** Trading
+*** List
+#+begin_src move
+/// List the item by setting a price and making it available for purchase.
+/// Performs an authorization check to make sure only owner can sell.
+public fun list<T: key + store>(
+    self: &mut Kiosk, cap: &KioskOwnerCap, id: ID, price: u64
+) {
+    assert!(has_access(self, cap), ENotOwner);
+    assert!(has_item_with_type<T>(self, id), EItemNotFound);
+    assert!(!is_listed_exclusively(self, id), EListedExclusively);
+
+    df::add(&mut self.id, Listing { id, is_exclusive: false }, price);
+    event::emit(ItemListed<T> { kiosk: object::id(self), id, price })
+}
+#+end_src
+
+*** Delist
+#+begin_src move
+/// Remove an existing listing from the `Kiosk` and keep the item in the
+/// user Kiosk. Can only be performed by the owner of the `Kiosk`.
+public fun delist<T: key + store>(
+    self: &mut Kiosk, cap: &KioskOwnerCap, id: ID
+) {
+    assert!(has_access(self, cap), ENotOwner);
+    assert!(has_item_with_type<T>(self, id), EItemNotFound);
+    assert!(!is_listed_exclusively(self, id), EListedExclusively);
+    assert!(is_listed(self, id), ENotListed);
+
+    df::remove<Listing, u64>(&mut self.id, Listing { id, is_exclusive: false });
+    event::emit(ItemDelisted<T> { kiosk: object::id(self), id })
+}
+#+end_src
+
+*** Purchase
+#+begin_src move
+/// Make a trade: pay the owner of the item and request a Transfer to the `target`
+/// kiosk (to prevent item being taken by the approving party).
+///
+/// Received `TransferRequest` needs to be handled by the publisher of the T,
+/// if they have a method implemented that allows a trade, it is possible to
+/// request their approval (by calling some function) so that the trade can be
+/// finalized.
+public fun purchase<T: key + store>(
+    self: &mut Kiosk, id: ID, payment: Coin<SUI>
+): (T, TransferRequest<T>) {
+    let price = df::remove<Listing, u64>(&mut self.id, Listing { id, is_exclusive: false }); // dynamic fields
+    let inner = dof::remove<Item, T>(&mut self.id, Item { id }); // dynamic object fields
+
+    self.item_count = self.item_count - 1;
+    assert!(price == coin::value(&payment), EIncorrectAmount);
+    df::remove_if_exists<Lock, bool>(&mut self.id, Lock { id });
+    coin::put(&mut self.profits, payment);
+
+    event::emit(ItemPurchased<T> { kiosk: object::id(self), id, price });
+
+    (inner, transfer_policy::new_request(id, price, object::id(self)))
+}
+#+end_src
+
+- Transfer Request
+#+begin_src move
+public struct TransferRequest<phantom T> {
+    /// The ID of the transferred item. Although the `T` has no
+    /// constraints, the main use case for this module is to work
+    /// with Objects.
+    item: ID,
+    /// Amount of SUI paid for the item. Can be used to
+    /// calculate the fee / transfer policy enforcement.
+    paid: u64,
+    /// The ID of the Kiosk / Safe the object is being sold from.
+    /// Can be used by the TransferPolicy implementors.
+    from: ID,
+    /// Collected Receipts. Used to verify that all of the rules
+    /// were followed and `TransferRequest` can be confirmed.
+    receipts: VecSet<TypeName>
+}
+
+/// Construct a new `TransferRequest` hot potato which requires an
+/// approving action from the creator to be destroyed / resolved. Once
+/// created, it must be confirmed in the `confirm_request` call otherwise
+/// the transaction will fail.
+public fun new_request<T>(
+    item: ID, paid: u64, from: ID
+): TransferRequest<T> {
+    TransferRequest { item, paid, from, receipts: vec_set::empty() }
+}
+
+/// Get the `item` field of the `TransferRequest`.
+public fun item<T>(self: &TransferRequest<T>): ID { self.item }
+
+/// Get the `paid` field of the `TransferRequest`.
+public fun paid<T>(self: &TransferRequest<T>): u64 { self.paid }
+
+/// Get the `from` field of the `TransferRequest`.
+public fun from<T>(self: &TransferRequest<T>): ID { self.from }
+#+end_src
+
+*** Withdraw
+#+begin_src move
+/// Withdraw profits from the Kiosk.
+public fun withdraw(
+    self: &mut Kiosk, cap: &KioskOwnerCap, amount: Option<u64>, ctx: &mut TxContext
+): Coin<SUI> {
+    assert!(has_access(self, cap), ENotOwner);
+
+    let amount = if (option::is_some(&amount)) {
+        let amt = option::destroy_some(amount);
+        assert!(amt <= balance::value(&self.profits), ENotEnough);
+        amt
+    } else {
+        balance::value(&self.profits)
+    };
+
+    coin::take(&mut self.profits, amount, ctx)
+}
+#+end_src
+
+** Borrowing
+*** Borrow
+#+begin_src move
+/// Immutably borrow an item from the `Kiosk`. Any item can be `borrow`ed
+/// at any time.
+public fun borrow<T: key + store>(
+    self: &Kiosk, cap: &KioskOwnerCap, id: ID
+): &T {
+    assert!(object::id(self) == cap.`for`, ENotOwner);
+    assert!(has_item(self, id), EItemNotFound);
+
+    dof::borrow(&self.id, Item { id })
+}
+#+end_src
+
+*** Borrow Mut
+#+begin_src move
+/// Mutably borrow an item from the `Kiosk`.
+/// Item can be `borrow_mut`ed only if it's not `is_listed`.
+public fun borrow_mut<T: key + store>(
+    self: &mut Kiosk, cap: &KioskOwnerCap, id: ID
+): &mut T {
+    assert!(has_access(self, cap), ENotOwner);
+    assert!(has_item(self, id), EItemNotFound);
+    assert!(!is_listed(self, id), EItemIsListed);
+
+    dof::borrow_mut(&mut self.id, Item { id })
+}
+
+#+end_src
+
+*** Borrow Val
+#+begin_src move
+/// Take the item from the `Kiosk` with a guarantee that it will be returned.
+/// Item can be `borrow_val`-ed only if it's not `is_listed`.
+public fun borrow_val<T: key + store>(
+    self: &mut Kiosk, cap: &KioskOwnerCap, id: ID
+): (T, Borrow) {
+    assert!(has_access(self, cap), ENotOwner);
+    assert!(has_item(self, id), EItemNotFound);
+    assert!(!is_listed(self, id), EItemIsListed);
+
+    (
+        dof::remove(&mut self.id, Item { id }),
+        Borrow { kiosk_id: object::id(self), item_id: id }
+    )
+}
+#+end_src
+
+*** Return Val
+#+begin_src move
+/// Return the borrowed item to the `Kiosk`. This method cannot be avoided
+/// if `borrow_val` is used.
+public fun return_val<T: key + store>(
+    self: &mut Kiosk, item: T, borrow: Borrow
+) {
+    let Borrow { kiosk_id, item_id } = borrow;
+
+    assert!(object::id(self) == kiosk_id, EWrongKiosk);
+    assert!(object::id(&item) == item_id, EItemMismatch);
+
+    dof::add(&mut self.id, Item { id: item_id }, item);
+}
+#+end_src
+
+* User Action
+- Đặt vật phẩm vào Kiosk: Thêm một vật phẩm vào Kiosk.
+- Lấy vật phẩm từ Kiosk: Loại bỏ một vật phẩm từ Kiosk.
+- Mượn vật phẩm (có thể thay đổi): Tạm thời sử dụng một vật phẩm từ Kiosk với khả năng sửa đổi nó.
+- Mượn vật phẩm (không thể thay đổi): Tạm thời sử dụng một vật phẩm từ Kiosk mà không thể thay đổi nó.
+- Niêm yết vật phẩm để bán và hủy niêm yết: Đưa/loại bỏ một vật phẩm ra khỏi danh sách bán trên mạng lưới Kiosk.
+- Mua một món hàng đang được bày bán từ bất kỳ Kiosk nào trong mạng lưới: Mua một món hàng đang được niêm yết để bán.
+* Item States
+- PLACED:
+  - Vật phẩm được đặt vào Kiosk bằng chức năng "place".
+  - Kiosk Onwer (KO) có thể lấy lại (take), nhưng cũng có thể mượn (borrow) (với khả năng thay đổi) hoặc niêm yết để bán (list)
+- LOCKED:
+  - Vật phẩm được đặt với tính năng "lock"
+  - KO không thể lấy vật phẩm đã bị khóa ra khỏi Kiosk, nhưng có thể mượn (với khả năng thay đổi) hoặc niêm yết để bán
+- LISTED:
+  - Vật phẩm được niêm yết để bán bằng chức năng "list"
+  - KO chỉ có thể mượn vật phẩm (không thay đổi được) hoặc hủy niêm yết.
+
+* Summary
+- Kiosk là một nơi lưu giữ các vật phẩm sưu tầm được chia sẻ giữa mọi người.
+- Kiosk có một chủ sở hữu duy nhất, được đại diện bởi quyền KioskOwnerCap.
+- Chủ Kiosk (KO) có toàn quyền kiểm soát Kiosk của họ.
+- Một món hàng đang được niêm yết có thể được mua bởi bất kỳ ai.
+- Một vật phẩm vẫn có thể được mượn khi đang được niêm yết để bán (nhưng chỉ ở dạng không thể thay đổi).
+- Vật phẩm có thể bị "khóa" trong Kiosk, không cho phép ai "lấy" chúng.
+- Đối với các hành động có nhiều bên tham gia, các sự kiện sẽ được phát ra để mọi người có thể nhận biết.
