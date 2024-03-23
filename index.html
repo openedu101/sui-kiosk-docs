@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2024-03-23 Sat 20:25 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sui Protocol | Practice | Kiosk</title>
+<meta name="author" content="Dang Quang Vu" />
+<meta name="generator" content="Org Mode" />
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/htmlize.css"/>
+<link rel="stylesheet" type="text/css" href="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/css/readtheorg.css"/>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/lib/js/jquery.stickytableheaders.min.js"></script>
+<script type="text/javascript" src="https://fniessen.github.io/org-html-themes/src/readtheorg_theme/js/readtheorg.js"></script>
+<style>pre.src{background:#343131;color:white;} </style>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title">Sui Protocol | Practice | Kiosk</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgdf4683b">1. About My Self</a></li>
+<li><a href="#org14a2edc">2. Collectibles on Sui</a></li>
+<li><a href="#orgfde1d4e">3. What you will receive in this Workshop session?</a></li>
+<li><a href="#org02c99dd">4. First Throughts</a></li>
+<li><a href="#orgb5869df">5. Roles: Three sides of a coin</a></li>
+<li><a href="#orga034e6c">6. How to define policy</a></li>
+<li><a href="#org6dce0e3">7. Kiosk API</a>
+<ul>
+<li><a href="#orgcb1796a">7.1. Create and Manager</a>
+<ul>
+<li><a href="#org22b44f6">7.1.1. New</a></li>
+<li><a href="#org0ef5e67">7.1.2. Place</a></li>
+<li><a href="#org3a28748">7.1.3. Take</a></li>
+<li><a href="#org3f9549f">7.1.4. Lock</a></li>
+</ul>
+</li>
+<li><a href="#orga5b1694">7.2. Trading</a>
+<ul>
+<li><a href="#orgbee3f9a">7.2.1. List</a></li>
+<li><a href="#org39fcfcb">7.2.2. Delist</a></li>
+<li><a href="#org097ee72">7.2.3. Purchase</a></li>
+<li><a href="#org32c7a83">7.2.4. Withdraw</a></li>
+</ul>
+</li>
+<li><a href="#org7776f8e">7.3. Borrowing</a>
+<ul>
+<li><a href="#org1924b82">7.3.1. Borrow</a></li>
+<li><a href="#org780245f">7.3.2. Borrow Mut</a></li>
+<li><a href="#orgcd0a351">7.3.3. Borrow Val</a></li>
+<li><a href="#org8a424c8">7.3.4. Return Val</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org09b83a2">8. User Action</a></li>
+<li><a href="#orgfef0253">9. Item States</a></li>
+<li><a href="#orgefdd4c6">10. Summary</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgdf4683b" class="outline-2">
+<h2 id="orgdf4683b"><span class="section-number-2">1.</span> About My Self</h2>
+<div class="outline-text-2" id="text-1">
+<blockquote>
+<ul class="org-ul">
+<li>Đặng Quang Vũ</li>
+<li>Founder Openedu101.com</li>
+<li>Head of Faculty VBI &amp; Blockchain Technical Lead GFI</li>
+<li>7+ Years of experience: web3, blockchain, smartcontract</li>
+<li>Worked with: EVM, Solana, NEAR, Sui, Cosmos, Polkadot, Zero Knowledge Proof - ZKP</li>
+</ul>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-org14a2edc" class="outline-2">
+<h2 id="org14a2edc"><span class="section-number-2">2.</span> Collectibles on Sui</h2>
+<div class="outline-text-2" id="text-2">
+<ul class="org-ul">
+<li>Non-Fungibility</li>
+<li>Onwership</li>
+<li>Stored Data</li>
+<li>Transfer Rules - Royalties - Kiosk + TransferPolicy</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgfde1d4e" class="outline-2">
+<h2 id="orgfde1d4e"><span class="section-number-2">3.</span> What you will receive in this Workshop session?</h2>
+<div class="outline-text-2" id="text-3">
+<ul class="org-ul">
+<li>Có thể niêm yết một món đồ trên thị trường và vẫn tiếp tục sử dụng nó được không?</li>
+<li>Có cách nào để tạo một "safe" an toàn để lưu trữ các vật phẩm sưu tầm không?</li>
+<li>Chúng ta có thể xây dựng một hệ thống áp dụng các logic tùy chỉnh để liên kết các "an toàn" lại với nhau không?</li>
+<li>Làm cách nào để đảm bảo lợi ích cho các nhà sáng tạo và tiền bản quyền của họ?</li>
+<li>Chúng ta có thể thiết kế hệ thống phi tập trung để tránh việc quyền kiểm soát rơi vào một đơn vị duy nhất không?</li>
+<li>Làm thế nào để đảm bảo về mặt bảo mật và độ tin cậy cho hệ thống?</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org02c99dd" class="outline-2">
+<h2 id="org02c99dd"><span class="section-number-2">4.</span> First Throughts</h2>
+<div class="outline-text-2" id="text-4">
+<ul class="org-ul">
+<li>Shared Object</li>
+<li>Stores Collectibles as dynamic fields</li>
+<li>Có chủ sở hữu hợp lệ  + có khả năng quản lý</li>
+<li>Chủ sở hữu có thể "niêm yết" + bất kỳ ai cũng có thể mang Coin đến và "mua"</li>
+<li>has a single owner</li>
+<li>&#x2026; Like a mini-store</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgb5869df" class="outline-2">
+<h2 id="orgb5869df"><span class="section-number-2">5.</span> Roles: Three sides of a coin</h2>
+<div class="outline-text-2" id="text-5">
+<ul class="org-ul">
+<li>Seller lists</li>
+<li>Buyer purchases and follow the policy</li>
+<li>Creator create the policy</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orga034e6c" class="outline-2">
+<h2 id="orga034e6c"><span class="section-number-2">6.</span> How to define policy</h2>
+<div class="outline-text-2" id="text-6">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #ff9e64;">transfer</span>::transfer<span style="color: #a9b1d6;">()</span> <span style="color: #51587a;">// </span><span style="color: #51587a;">can albe to custom policy</span>
+<span style="color: #ff9e64;">transfer</span>::public_transfer<span style="color: #a9b1d6;">()</span> <span style="color: #51587a;">// </span><span style="color: #51587a;">non-policy</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6dce0e3" class="outline-2">
+<h2 id="org6dce0e3"><span class="section-number-2">7.</span> Kiosk API</h2>
+<div class="outline-text-2" id="text-7">
+</div>
+<div id="outline-container-orgcb1796a" class="outline-3">
+<h3 id="orgcb1796a"><span class="section-number-3">7.1.</span> Create and Manager</h3>
+<div class="outline-text-3" id="text-7-1">
+</div>
+<div id="outline-container-org22b44f6" class="outline-4">
+<h4 id="org22b44f6"><span class="section-number-4">7.1.1.</span> New</h4>
+<div class="outline-text-4" id="text-7-1-1">
+<ul class="org-ul">
+<li>Return: Shared object Kiosk</li>
+<li>KioskOnwerCap: Owned by creator</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #7c819b;">/// Creates a new `Kiosk` with a matching `KioskOwnerCap`.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">new</span><span style="color: #a9b1d6;">(</span><span style="color: #c0caf5;">ctx</span>: &amp;<span style="color: #bb9af7;">mut</span> <span style="color: #c0caf5;">TxContext</span><span style="color: #a9b1d6;">)</span>: <span style="color: #a9b1d6;">(</span><span style="color: #c0caf5;">Kiosk</span>, <span style="color: #c0caf5;">KioskOwnerCap</span><span style="color: #a9b1d6;">)</span> <span style="color: #a9b1d6;">{</span>
+    <span style="color: #bb9af7;">let</span> <span style="color: #c0caf5;">kiosk</span> = <span style="color: #c0caf5;">Kiosk</span> <span style="color: #7aa2f7;">{</span>
+        <span style="color: #c0caf5;">id</span>: <span style="color: #ff9e64;">object</span>::new<span style="color: #ff9e64;">(</span>ctx<span style="color: #ff9e64;">)</span>,
+        <span style="color: #c0caf5;">profits</span>: <span style="color: #ff9e64;">balance</span>::zero<span style="color: #ff9e64;">()</span>,
+        <span style="color: #c0caf5;">owner</span>: sender<span style="color: #ff9e64;">(</span>ctx<span style="color: #ff9e64;">)</span>,
+        <span style="color: #c0caf5;">item_count</span>: 0,
+        <span style="color: #c0caf5;">allow_extensions</span>: <span style="color: #bb9af7;">false</span>
+
+        <span style="color: #bb9af7;">let</span> <span style="color: #c0caf5;">cap</span> = <span style="color: #c0caf5;">KioskOwnerCap</span> <span style="color: #ff9e64;">{</span>
+        <span style="color: #c0caf5;">id</span>: <span style="color: #ff9e64;">object</span>::new<span style="color: #73daca;">(</span>ctx<span style="color: #73daca;">)</span>,
+        `for`: <span style="color: #ff9e64;">object</span>::id<span style="color: #73daca;">(</span>&amp;kiosk<span style="color: #73daca;">)</span>
+
+        <span style="color: #73daca;">(</span>kiosk, cap<span style="color: #73daca;">)</span>
+<span style="color: #ff9e64;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0ef5e67" class="outline-4">
+<h4 id="org0ef5e67"><span class="section-number-4">7.1.2.</span> Place</h4>
+<div class="outline-text-4" id="text-7-1-2">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #7c819b;">/// Place any object into a Kiosk.</span>
+<span style="color: #7c819b;">/// Performs an authorization check to make sure only owner can do that.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">place</span>&lt;<span style="color: #c0caf5;">T</span>: <span style="color: #c0caf5;">key</span> + <span style="color: #c0caf5;">store</span>&gt;<span style="color: #a9b1d6;">(</span><span style="color: #c0caf5;">self</span>: &amp;<span style="color: #bb9af7;">mut</span> <span style="color: #c0caf5;">Kiosk</span>, <span style="color: #c0caf5;">cap</span>: &amp;<span style="color: #c0caf5;">KioskOwnerCap</span>, <span style="color: #c0caf5;">item</span>: <span style="color: #c0caf5;">T</span><span style="color: #a9b1d6;">)</span> <span style="color: #a9b1d6;">{</span>
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_access<span style="color: #ff9e64;">(</span>self, cap<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">ENotOwner</span><span style="color: #7aa2f7;">)</span>;
+    place_internal<span style="color: #7aa2f7;">(</span>self, item<span style="color: #7aa2f7;">)</span>
+<span style="color: #a9b1d6;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3a28748" class="outline-4">
+<h4 id="org3a28748"><span class="section-number-4">7.1.3.</span> Take</h4>
+<div class="outline-text-4" id="text-7-1-3">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #7c819b;">/// Take any object from the Kiosk.</span>
+<span style="color: #7c819b;">/// Performs an authorization check to make sure only owner can do that.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">take</span>&lt;<span style="color: #c0caf5;">T</span>: <span style="color: #c0caf5;">key</span> + <span style="color: #c0caf5;">store</span>&gt;<span style="color: #a9b1d6;">(</span><span style="color: #c0caf5;">self</span>: &amp;<span style="color: #bb9af7;">mut</span> <span style="color: #c0caf5;">Kiosk</span>, <span style="color: #c0caf5;">cap</span>: &amp;<span style="color: #c0caf5;">KioskOwnerCap</span>, <span style="color: #c0caf5;">id</span>: <span style="color: #c0caf5;">ID</span><span style="color: #a9b1d6;">)</span>: <span style="color: #c0caf5;">T</span> <span style="color: #a9b1d6;">{</span>
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_access<span style="color: #ff9e64;">(</span>self, cap<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">ENotOwner</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>!is_locked<span style="color: #ff9e64;">(</span>self, id<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">EItemLocked</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>!is_listed_exclusively<span style="color: #ff9e64;">(</span>self, id<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">EListedExclusively</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_item<span style="color: #ff9e64;">(</span>self, id<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">EItemNotFound</span><span style="color: #7aa2f7;">)</span>;
+
+    self.item_count = self.item_count - 1;
+    <span style="color: #ff9e64;">df</span>::remove_if_exists&lt;<span style="color: #c0caf5;">Listing</span>, <span style="color: #c0caf5;">u64</span>&gt;<span style="color: #7aa2f7;">(</span>&amp;<span style="color: #bb9af7;">mut</span> self.id, <span style="color: #c0caf5;">Listing</span> <span style="color: #ff9e64;">{</span> id, <span style="color: #c0caf5;">is_exclusive</span>: <span style="color: #bb9af7;">false</span> <span style="color: #ff9e64;">}</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #ff9e64;">dof</span>::remove<span style="color: #7aa2f7;">(</span>&amp;<span style="color: #bb9af7;">mut</span> self.id, <span style="color: #c0caf5;">Item</span> <span style="color: #ff9e64;">{</span> id <span style="color: #ff9e64;">}</span><span style="color: #7aa2f7;">)</span>
+<span style="color: #a9b1d6;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3f9549f" class="outline-4">
+<h4 id="org3f9549f"><span class="section-number-4">7.1.4.</span> Lock</h4>
+<div class="outline-text-4" id="text-7-1-4">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #7c819b;">/// Place an item to the `Kiosk` and issue a `Lock` for it. Once placed this</span>
+<span style="color: #7c819b;">/// way, an item can only be listed either with a `list` function or with a</span>
+<span style="color: #7c819b;">/// `list_with_purchase_cap`.</span>
+<span style="color: #7c819b;">///</span>
+<span style="color: #7c819b;">/// Requires policy for `T` to make sure that there's an issued `TransferPolicy`</span>
+<span style="color: #7c819b;">/// and the item can be sold, otherwise the asset might be locked forever.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">lock</span>&lt;<span style="color: #c0caf5;">T</span>: <span style="color: #c0caf5;">key</span> + <span style="color: #c0caf5;">store</span>&gt;<span style="color: #a9b1d6;">(</span>
+    <span style="color: #c0caf5;">self</span>: &amp;<span style="color: #bb9af7;">mut</span> <span style="color: #c0caf5;">Kiosk</span>, <span style="color: #c0caf5;">cap</span>: &amp;<span style="color: #c0caf5;">KioskOwnerCap</span>, <span style="color: #c0caf5;">_policy</span>: &amp;<span style="color: #c0caf5;">TransferPolicy</span>&lt;<span style="color: #c0caf5;">T</span>&gt;, <span style="color: #c0caf5;">item</span>: <span style="color: #c0caf5;">T</span>
+<span style="color: #a9b1d6;">)</span> <span style="color: #a9b1d6;">{</span>
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_access<span style="color: #ff9e64;">(</span>self, cap<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">ENotOwner</span><span style="color: #7aa2f7;">)</span>;
+    lock_internal<span style="color: #7aa2f7;">(</span>self, item<span style="color: #7aa2f7;">)</span>
+<span style="color: #a9b1d6;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga5b1694" class="outline-3">
+<h3 id="orga5b1694"><span class="section-number-3">7.2.</span> Trading</h3>
+<div class="outline-text-3" id="text-7-2">
+</div>
+<div id="outline-container-orgbee3f9a" class="outline-4">
+<h4 id="orgbee3f9a"><span class="section-number-4">7.2.1.</span> List</h4>
+<div class="outline-text-4" id="text-7-2-1">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #7c819b;">/// List the item by setting a price and making it available for purchase.</span>
+<span style="color: #7c819b;">/// Performs an authorization check to make sure only owner can sell.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">list</span>&lt;<span style="color: #c0caf5;">T</span>: <span style="color: #c0caf5;">key</span> + <span style="color: #c0caf5;">store</span>&gt;<span style="color: #a9b1d6;">(</span>
+    <span style="color: #c0caf5;">self</span>: &amp;<span style="color: #bb9af7;">mut</span> <span style="color: #c0caf5;">Kiosk</span>, <span style="color: #c0caf5;">cap</span>: &amp;<span style="color: #c0caf5;">KioskOwnerCap</span>, <span style="color: #c0caf5;">id</span>: <span style="color: #c0caf5;">ID</span>, <span style="color: #c0caf5;">price</span>: <span style="color: #c0caf5;">u64</span>
+<span style="color: #a9b1d6;">)</span> <span style="color: #a9b1d6;">{</span>
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_access<span style="color: #ff9e64;">(</span>self, cap<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">ENotOwner</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_item_with_type&lt;<span style="color: #c0caf5;">T</span>&gt;<span style="color: #ff9e64;">(</span>self, id<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">EItemNotFound</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>!is_listed_exclusively<span style="color: #ff9e64;">(</span>self, id<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">EListedExclusively</span><span style="color: #7aa2f7;">)</span>;
+
+    <span style="color: #ff9e64;">df</span>::add<span style="color: #7aa2f7;">(</span>&amp;<span style="color: #bb9af7;">mut</span> self.id, <span style="color: #c0caf5;">Listing</span> <span style="color: #ff9e64;">{</span> id, <span style="color: #c0caf5;">is_exclusive</span>: <span style="color: #bb9af7;">false</span> <span style="color: #ff9e64;">}</span>, price<span style="color: #7aa2f7;">)</span>;
+    <span style="color: #ff9e64;">event</span>::emit<span style="color: #7aa2f7;">(</span><span style="color: #c0caf5;">ItemListed</span>&lt;<span style="color: #c0caf5;">T</span>&gt; <span style="color: #ff9e64;">{</span> <span style="color: #c0caf5;">kiosk</span>: <span style="color: #ff9e64;">object</span>::id<span style="color: #73daca;">(</span>self<span style="color: #73daca;">)</span>, id, price <span style="color: #ff9e64;">}</span><span style="color: #7aa2f7;">)</span>
+<span style="color: #a9b1d6;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org39fcfcb" class="outline-4">
+<h4 id="org39fcfcb"><span class="section-number-4">7.2.2.</span> Delist</h4>
+<div class="outline-text-4" id="text-7-2-2">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #7c819b;">/// Remove an existing listing from the `Kiosk` and keep the item in the</span>
+<span style="color: #7c819b;">/// user Kiosk. Can only be performed by the owner of the `Kiosk`.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">delist</span>&lt;<span style="color: #c0caf5;">T</span>: <span style="color: #c0caf5;">key</span> + <span style="color: #c0caf5;">store</span>&gt;<span style="color: #a9b1d6;">(</span>
+    <span style="color: #c0caf5;">self</span>: &amp;<span style="color: #bb9af7;">mut</span> <span style="color: #c0caf5;">Kiosk</span>, <span style="color: #c0caf5;">cap</span>: &amp;<span style="color: #c0caf5;">KioskOwnerCap</span>, <span style="color: #c0caf5;">id</span>: <span style="color: #c0caf5;">ID</span>
+<span style="color: #a9b1d6;">)</span> <span style="color: #a9b1d6;">{</span>
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_access<span style="color: #ff9e64;">(</span>self, cap<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">ENotOwner</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_item_with_type&lt;<span style="color: #c0caf5;">T</span>&gt;<span style="color: #ff9e64;">(</span>self, id<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">EItemNotFound</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>!is_listed_exclusively<span style="color: #ff9e64;">(</span>self, id<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">EListedExclusively</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>is_listed<span style="color: #ff9e64;">(</span>self, id<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">ENotListed</span><span style="color: #7aa2f7;">)</span>;
+
+    <span style="color: #ff9e64;">df</span>::remove&lt;<span style="color: #c0caf5;">Listing</span>, <span style="color: #c0caf5;">u64</span>&gt;<span style="color: #7aa2f7;">(</span>&amp;<span style="color: #bb9af7;">mut</span> self.id, <span style="color: #c0caf5;">Listing</span> <span style="color: #ff9e64;">{</span> id, <span style="color: #c0caf5;">is_exclusive</span>: <span style="color: #bb9af7;">false</span> <span style="color: #ff9e64;">}</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #ff9e64;">event</span>::emit<span style="color: #7aa2f7;">(</span><span style="color: #c0caf5;">ItemDelisted</span>&lt;<span style="color: #c0caf5;">T</span>&gt; <span style="color: #ff9e64;">{</span> <span style="color: #c0caf5;">kiosk</span>: <span style="color: #ff9e64;">object</span>::id<span style="color: #73daca;">(</span>self<span style="color: #73daca;">)</span>, id <span style="color: #ff9e64;">}</span><span style="color: #7aa2f7;">)</span>
+<span style="color: #a9b1d6;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org097ee72" class="outline-4">
+<h4 id="org097ee72"><span class="section-number-4">7.2.3.</span> Purchase</h4>
+<div class="outline-text-4" id="text-7-2-3">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #7c819b;">/// Make a trade: pay the owner of the item and request a Transfer to the `target`</span>
+<span style="color: #7c819b;">/// kiosk (to prevent item being taken by the approving party).</span>
+<span style="color: #7c819b;">///</span>
+<span style="color: #7c819b;">/// Received `TransferRequest` needs to be handled by the publisher of the T,</span>
+<span style="color: #7c819b;">/// if they have a method implemented that allows a trade, it is possible to</span>
+<span style="color: #7c819b;">/// request their approval (by calling some function) so that the trade can be</span>
+<span style="color: #7c819b;">/// finalized.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">purchase</span>&lt;<span style="color: #c0caf5;">T</span>: <span style="color: #c0caf5;">key</span> + <span style="color: #c0caf5;">store</span>&gt;<span style="color: #a9b1d6;">(</span>
+    <span style="color: #c0caf5;">self</span>: &amp;<span style="color: #bb9af7;">mut</span> <span style="color: #c0caf5;">Kiosk</span>, <span style="color: #c0caf5;">id</span>: <span style="color: #c0caf5;">ID</span>, <span style="color: #c0caf5;">payment</span>: <span style="color: #c0caf5;">Coin</span>&lt;<span style="color: #c0caf5;">SUI</span>&gt;
+<span style="color: #a9b1d6;">)</span>: <span style="color: #a9b1d6;">(</span><span style="color: #c0caf5;">T</span>, <span style="color: #c0caf5;">TransferRequest</span>&lt;<span style="color: #c0caf5;">T</span>&gt;<span style="color: #a9b1d6;">)</span> <span style="color: #a9b1d6;">{</span>
+    <span style="color: #bb9af7;">let</span> <span style="color: #c0caf5;">price</span> = <span style="color: #ff9e64;">df</span>::remove&lt;<span style="color: #c0caf5;">Listing</span>, <span style="color: #c0caf5;">u64</span>&gt;<span style="color: #7aa2f7;">(</span>&amp;<span style="color: #bb9af7;">mut</span> self.id, <span style="color: #c0caf5;">Listing</span> <span style="color: #ff9e64;">{</span> id, <span style="color: #c0caf5;">is_exclusive</span>: <span style="color: #bb9af7;">false</span> <span style="color: #ff9e64;">}</span><span style="color: #7aa2f7;">)</span>; <span style="color: #51587a;">// </span><span style="color: #51587a;">dynamic fields</span>
+    <span style="color: #bb9af7;">let</span> <span style="color: #c0caf5;">inner</span> = <span style="color: #ff9e64;">dof</span>::remove&lt;<span style="color: #c0caf5;">Item</span>, <span style="color: #c0caf5;">T</span>&gt;<span style="color: #7aa2f7;">(</span>&amp;<span style="color: #bb9af7;">mut</span> self.id, <span style="color: #c0caf5;">Item</span> <span style="color: #ff9e64;">{</span> id <span style="color: #ff9e64;">}</span><span style="color: #7aa2f7;">)</span>; <span style="color: #51587a;">// </span><span style="color: #51587a;">dynamic object fields</span>
+
+    self.item_count = self.item_count - 1;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>price == <span style="color: #ff9e64;">coin</span>::value<span style="color: #ff9e64;">(</span>&amp;payment<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">EIncorrectAmount</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #ff9e64;">df</span>::remove_if_exists&lt;<span style="color: #c0caf5;">Lock</span>, <span style="color: #c0caf5;">bool</span>&gt;<span style="color: #7aa2f7;">(</span>&amp;<span style="color: #bb9af7;">mut</span> self.id, <span style="color: #c0caf5;">Lock</span> <span style="color: #ff9e64;">{</span> id <span style="color: #ff9e64;">}</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #ff9e64;">coin</span>::put<span style="color: #7aa2f7;">(</span>&amp;<span style="color: #bb9af7;">mut</span> self.profits, payment<span style="color: #7aa2f7;">)</span>;
+
+    <span style="color: #ff9e64;">event</span>::emit<span style="color: #7aa2f7;">(</span><span style="color: #c0caf5;">ItemPurchased</span>&lt;<span style="color: #c0caf5;">T</span>&gt; <span style="color: #ff9e64;">{</span> <span style="color: #c0caf5;">kiosk</span>: <span style="color: #ff9e64;">object</span>::id<span style="color: #73daca;">(</span>self<span style="color: #73daca;">)</span>, id, price <span style="color: #ff9e64;">}</span><span style="color: #7aa2f7;">)</span>;
+
+    <span style="color: #7aa2f7;">(</span>inner, <span style="color: #ff9e64;">transfer_policy</span>::new_request<span style="color: #ff9e64;">(</span>id, price, <span style="color: #ff9e64;">object</span>::id<span style="color: #73daca;">(</span>self<span style="color: #73daca;">)</span><span style="color: #ff9e64;">)</span><span style="color: #7aa2f7;">)</span>
+<span style="color: #a9b1d6;">}</span>
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Transfer Request</li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">struct</span> <span style="color: #c0caf5;">TransferRequest</span>&lt;<span style="color: #bb9af7;">phantom</span> <span style="color: #c0caf5;">T</span>&gt; <span style="color: #a9b1d6;">{</span>
+    <span style="color: #7c819b;">/// The ID of the transferred item. Although the `T` has no</span>
+    <span style="color: #7c819b;">/// constraints, the main use case for this module is to work</span>
+    <span style="color: #7c819b;">/// with Objects.</span>
+    <span style="color: #c0caf5;">item</span>: <span style="color: #c0caf5;">ID</span>,
+    <span style="color: #7c819b;">/// Amount of SUI paid for the item. Can be used to</span>
+    <span style="color: #7c819b;">/// calculate the fee / transfer policy enforcement.</span>
+    <span style="color: #c0caf5;">paid</span>: <span style="color: #c0caf5;">u64</span>,
+    <span style="color: #7c819b;">/// The ID of the Kiosk / Safe the object is being sold from.</span>
+    <span style="color: #7c819b;">/// Can be used by the TransferPolicy implementors.</span>
+    <span style="color: #c0caf5;">from</span>: <span style="color: #c0caf5;">ID</span>,
+    <span style="color: #7c819b;">/// Collected Receipts. Used to verify that all of the rules</span>
+    <span style="color: #7c819b;">/// were followed and `TransferRequest` can be confirmed.</span>
+    <span style="color: #c0caf5;">receipts</span>: <span style="color: #c0caf5;">VecSet</span>&lt;<span style="color: #c0caf5;">TypeName</span>&gt;
+<span style="color: #a9b1d6;">}</span>
+
+<span style="color: #7c819b;">/// Construct a new `TransferRequest` hot potato which requires an</span>
+<span style="color: #7c819b;">/// approving action from the creator to be destroyed / resolved. Once</span>
+<span style="color: #7c819b;">/// created, it must be confirmed in the `confirm_request` call otherwise</span>
+<span style="color: #7c819b;">/// the transaction will fail.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">new_request</span>&lt;<span style="color: #c0caf5;">T</span>&gt;<span style="color: #a9b1d6;">(</span>
+    <span style="color: #c0caf5;">item</span>: <span style="color: #c0caf5;">ID</span>, <span style="color: #c0caf5;">paid</span>: <span style="color: #c0caf5;">u64</span>, <span style="color: #c0caf5;">from</span>: <span style="color: #c0caf5;">ID</span>
+<span style="color: #a9b1d6;">)</span>: <span style="color: #c0caf5;">TransferRequest</span>&lt;<span style="color: #c0caf5;">T</span>&gt; <span style="color: #a9b1d6;">{</span>
+    <span style="color: #c0caf5;">TransferRequest</span> <span style="color: #7aa2f7;">{</span> item, paid, from, <span style="color: #c0caf5;">receipts</span>: <span style="color: #ff9e64;">vec_set</span>::empty<span style="color: #ff9e64;">()</span> <span style="color: #7aa2f7;">}</span>
+<span style="color: #a9b1d6;">}</span>
+
+<span style="color: #7c819b;">/// Get the `item` field of the `TransferRequest`.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">item</span>&lt;<span style="color: #c0caf5;">T</span>&gt;<span style="color: #a9b1d6;">(</span><span style="color: #c0caf5;">self</span>: &amp;<span style="color: #c0caf5;">TransferRequest</span>&lt;<span style="color: #c0caf5;">T</span>&gt;<span style="color: #a9b1d6;">)</span>: <span style="color: #c0caf5;">ID</span> <span style="color: #a9b1d6;">{</span> self.item <span style="color: #a9b1d6;">}</span>
+
+<span style="color: #7c819b;">/// Get the `paid` field of the `TransferRequest`.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">paid</span>&lt;<span style="color: #c0caf5;">T</span>&gt;<span style="color: #a9b1d6;">(</span><span style="color: #c0caf5;">self</span>: &amp;<span style="color: #c0caf5;">TransferRequest</span>&lt;<span style="color: #c0caf5;">T</span>&gt;<span style="color: #a9b1d6;">)</span>: <span style="color: #c0caf5;">u64</span> <span style="color: #a9b1d6;">{</span> self.paid <span style="color: #a9b1d6;">}</span>
+
+<span style="color: #7c819b;">/// Get the `from` field of the `TransferRequest`.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">from</span>&lt;<span style="color: #c0caf5;">T</span>&gt;<span style="color: #a9b1d6;">(</span><span style="color: #c0caf5;">self</span>: &amp;<span style="color: #c0caf5;">TransferRequest</span>&lt;<span style="color: #c0caf5;">T</span>&gt;<span style="color: #a9b1d6;">)</span>: <span style="color: #c0caf5;">ID</span> <span style="color: #a9b1d6;">{</span> self.from <span style="color: #a9b1d6;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org32c7a83" class="outline-4">
+<h4 id="org32c7a83"><span class="section-number-4">7.2.4.</span> Withdraw</h4>
+<div class="outline-text-4" id="text-7-2-4">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #7c819b;">/// Withdraw profits from the Kiosk.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">withdraw</span><span style="color: #a9b1d6;">(</span>
+    <span style="color: #c0caf5;">self</span>: &amp;<span style="color: #bb9af7;">mut</span> <span style="color: #c0caf5;">Kiosk</span>, <span style="color: #c0caf5;">cap</span>: &amp;<span style="color: #c0caf5;">KioskOwnerCap</span>, <span style="color: #c0caf5;">amount</span>: <span style="color: #c0caf5;">Option</span>&lt;<span style="color: #c0caf5;">u64</span>&gt;, <span style="color: #c0caf5;">ctx</span>: &amp;<span style="color: #bb9af7;">mut</span> <span style="color: #c0caf5;">TxContext</span>
+<span style="color: #a9b1d6;">)</span>: <span style="color: #c0caf5;">Coin</span>&lt;<span style="color: #c0caf5;">SUI</span>&gt; <span style="color: #a9b1d6;">{</span>
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_access<span style="color: #ff9e64;">(</span>self, cap<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">ENotOwner</span><span style="color: #7aa2f7;">)</span>;
+
+    <span style="color: #bb9af7;">let</span> <span style="color: #c0caf5;">amount</span> = <span style="color: #bb9af7;">if</span> <span style="color: #7aa2f7;">(</span><span style="color: #ff9e64;">option</span>::is_some<span style="color: #ff9e64;">(</span>&amp;amount<span style="color: #ff9e64;">)</span><span style="color: #7aa2f7;">)</span> <span style="color: #7aa2f7;">{</span>
+        <span style="color: #bb9af7;">let</span> <span style="color: #c0caf5;">amt</span> = <span style="color: #ff9e64;">option</span>::destroy_some<span style="color: #ff9e64;">(</span>amount<span style="color: #ff9e64;">)</span>;
+        <span style="color: #f7768e;">assert!</span><span style="color: #ff9e64;">(</span>amt &lt;= <span style="color: #ff9e64;">balance</span>::value<span style="color: #73daca;">(</span>&amp;self.profits<span style="color: #73daca;">)</span>, <span style="color: #c0caf5;">ENotEnough</span><span style="color: #ff9e64;">)</span>;
+        amt
+    <span style="color: #7aa2f7;">}</span> <span style="color: #bb9af7;">else</span> <span style="color: #7aa2f7;">{</span>
+        <span style="color: #ff9e64;">balance</span>::value<span style="color: #ff9e64;">(</span>&amp;self.profits<span style="color: #ff9e64;">)</span>
+    <span style="color: #7aa2f7;">}</span>;
+
+    <span style="color: #ff9e64;">coin</span>::take<span style="color: #7aa2f7;">(</span>&amp;<span style="color: #bb9af7;">mut</span> self.profits, amount, ctx<span style="color: #7aa2f7;">)</span>
+<span style="color: #a9b1d6;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7776f8e" class="outline-3">
+<h3 id="org7776f8e"><span class="section-number-3">7.3.</span> Borrowing</h3>
+<div class="outline-text-3" id="text-7-3">
+</div>
+<div id="outline-container-org1924b82" class="outline-4">
+<h4 id="org1924b82"><span class="section-number-4">7.3.1.</span> Borrow</h4>
+<div class="outline-text-4" id="text-7-3-1">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #7c819b;">/// Immutably borrow an item from the `Kiosk`. Any item can be `borrow`ed</span>
+<span style="color: #7c819b;">/// at any time.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">borrow</span>&lt;<span style="color: #c0caf5;">T</span>: <span style="color: #c0caf5;">key</span> + <span style="color: #c0caf5;">store</span>&gt;<span style="color: #a9b1d6;">(</span>
+    <span style="color: #c0caf5;">self</span>: &amp;<span style="color: #c0caf5;">Kiosk</span>, <span style="color: #c0caf5;">cap</span>: &amp;<span style="color: #c0caf5;">KioskOwnerCap</span>, <span style="color: #c0caf5;">id</span>: <span style="color: #c0caf5;">ID</span>
+<span style="color: #a9b1d6;">)</span>: &amp;<span style="color: #c0caf5;">T</span> <span style="color: #a9b1d6;">{</span>
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span><span style="color: #ff9e64;">object</span>::id<span style="color: #ff9e64;">(</span>self<span style="color: #ff9e64;">)</span> == cap.`for`, <span style="color: #c0caf5;">ENotOwner</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_item<span style="color: #ff9e64;">(</span>self, id<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">EItemNotFound</span><span style="color: #7aa2f7;">)</span>;
+
+    <span style="color: #ff9e64;">dof</span>::borrow<span style="color: #7aa2f7;">(</span>&amp;self.id, <span style="color: #c0caf5;">Item</span> <span style="color: #ff9e64;">{</span> id <span style="color: #ff9e64;">}</span><span style="color: #7aa2f7;">)</span>
+<span style="color: #a9b1d6;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org780245f" class="outline-4">
+<h4 id="org780245f"><span class="section-number-4">7.3.2.</span> Borrow Mut</h4>
+<div class="outline-text-4" id="text-7-3-2">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #7c819b;">/// Mutably borrow an item from the `Kiosk`.</span>
+<span style="color: #7c819b;">/// Item can be `borrow_mut`ed only if it's not `is_listed`.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">borrow_mut</span>&lt;<span style="color: #c0caf5;">T</span>: <span style="color: #c0caf5;">key</span> + <span style="color: #c0caf5;">store</span>&gt;<span style="color: #a9b1d6;">(</span>
+    <span style="color: #c0caf5;">self</span>: &amp;<span style="color: #bb9af7;">mut</span> <span style="color: #c0caf5;">Kiosk</span>, <span style="color: #c0caf5;">cap</span>: &amp;<span style="color: #c0caf5;">KioskOwnerCap</span>, <span style="color: #c0caf5;">id</span>: <span style="color: #c0caf5;">ID</span>
+<span style="color: #a9b1d6;">)</span>: &amp;<span style="color: #bb9af7;">mut</span> <span style="color: #c0caf5;">T</span> <span style="color: #a9b1d6;">{</span>
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_access<span style="color: #ff9e64;">(</span>self, cap<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">ENotOwner</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_item<span style="color: #ff9e64;">(</span>self, id<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">EItemNotFound</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>!is_listed<span style="color: #ff9e64;">(</span>self, id<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">EItemIsListed</span><span style="color: #7aa2f7;">)</span>;
+
+    <span style="color: #ff9e64;">dof</span>::borrow_mut<span style="color: #7aa2f7;">(</span>&amp;<span style="color: #bb9af7;">mut</span> self.id, <span style="color: #c0caf5;">Item</span> <span style="color: #ff9e64;">{</span> id <span style="color: #ff9e64;">}</span><span style="color: #7aa2f7;">)</span>
+<span style="color: #a9b1d6;">}</span>
+
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgcd0a351" class="outline-4">
+<h4 id="orgcd0a351"><span class="section-number-4">7.3.3.</span> Borrow Val</h4>
+<div class="outline-text-4" id="text-7-3-3">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #7c819b;">/// Take the item from the `Kiosk` with a guarantee that it will be returned.</span>
+<span style="color: #7c819b;">/// Item can be `borrow_val`-ed only if it's not `is_listed`.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">borrow_val</span>&lt;<span style="color: #c0caf5;">T</span>: <span style="color: #c0caf5;">key</span> + <span style="color: #c0caf5;">store</span>&gt;<span style="color: #a9b1d6;">(</span>
+    <span style="color: #c0caf5;">self</span>: &amp;<span style="color: #bb9af7;">mut</span> <span style="color: #c0caf5;">Kiosk</span>, <span style="color: #c0caf5;">cap</span>: &amp;<span style="color: #c0caf5;">KioskOwnerCap</span>, <span style="color: #c0caf5;">id</span>: <span style="color: #c0caf5;">ID</span>
+<span style="color: #a9b1d6;">)</span>: <span style="color: #a9b1d6;">(</span><span style="color: #c0caf5;">T</span>, <span style="color: #c0caf5;">Borrow</span><span style="color: #a9b1d6;">)</span> <span style="color: #a9b1d6;">{</span>
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_access<span style="color: #ff9e64;">(</span>self, cap<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">ENotOwner</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>has_item<span style="color: #ff9e64;">(</span>self, id<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">EItemNotFound</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span>!is_listed<span style="color: #ff9e64;">(</span>self, id<span style="color: #ff9e64;">)</span>, <span style="color: #c0caf5;">EItemIsListed</span><span style="color: #7aa2f7;">)</span>;
+
+    <span style="color: #7aa2f7;">(</span>
+        <span style="color: #ff9e64;">dof</span>::remove<span style="color: #ff9e64;">(</span>&amp;<span style="color: #bb9af7;">mut</span> self.id, <span style="color: #c0caf5;">Item</span> <span style="color: #73daca;">{</span> id <span style="color: #73daca;">}</span><span style="color: #ff9e64;">)</span>,
+        <span style="color: #c0caf5;">Borrow</span> <span style="color: #ff9e64;">{</span> <span style="color: #c0caf5;">kiosk_id</span>: <span style="color: #ff9e64;">object</span>::id<span style="color: #73daca;">(</span>self<span style="color: #73daca;">)</span>, <span style="color: #c0caf5;">item_id</span>: id <span style="color: #ff9e64;">}</span>
+    <span style="color: #7aa2f7;">)</span>
+<span style="color: #a9b1d6;">}</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8a424c8" class="outline-4">
+<h4 id="org8a424c8"><span class="section-number-4">7.3.4.</span> Return Val</h4>
+<div class="outline-text-4" id="text-7-3-4">
+<div class="org-src-container">
+<pre class="src src-move"><span style="color: #7c819b;">/// Return the borrowed item to the `Kiosk`. This method cannot be avoided</span>
+<span style="color: #7c819b;">/// if `borrow_val` is used.</span>
+<span style="color: #bb9af7;">public</span> <span style="color: #bb9af7;">fun</span> <span style="color: #7aa2f7;">return_val</span>&lt;<span style="color: #c0caf5;">T</span>: <span style="color: #c0caf5;">key</span> + <span style="color: #c0caf5;">store</span>&gt;<span style="color: #a9b1d6;">(</span>
+    <span style="color: #c0caf5;">self</span>: &amp;<span style="color: #bb9af7;">mut</span> <span style="color: #c0caf5;">Kiosk</span>, <span style="color: #c0caf5;">item</span>: <span style="color: #c0caf5;">T</span>, <span style="color: #c0caf5;">borrow</span>: <span style="color: #c0caf5;">Borrow</span>
+<span style="color: #a9b1d6;">)</span> <span style="color: #a9b1d6;">{</span>
+    <span style="color: #bb9af7;">let</span> <span style="color: #c0caf5;">Borrow</span> <span style="color: #7aa2f7;">{</span> kiosk_id, item_id <span style="color: #7aa2f7;">}</span> = borrow;
+
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span><span style="color: #ff9e64;">object</span>::id<span style="color: #ff9e64;">(</span>self<span style="color: #ff9e64;">)</span> == kiosk_id, <span style="color: #c0caf5;">EWrongKiosk</span><span style="color: #7aa2f7;">)</span>;
+    <span style="color: #f7768e;">assert!</span><span style="color: #7aa2f7;">(</span><span style="color: #ff9e64;">object</span>::id<span style="color: #ff9e64;">(</span>&amp;item<span style="color: #ff9e64;">)</span> == item_id, <span style="color: #c0caf5;">EItemMismatch</span><span style="color: #7aa2f7;">)</span>;
+
+    <span style="color: #ff9e64;">dof</span>::add<span style="color: #7aa2f7;">(</span>&amp;<span style="color: #bb9af7;">mut</span> self.id, <span style="color: #c0caf5;">Item</span> <span style="color: #ff9e64;">{</span> <span style="color: #c0caf5;">id</span>: item_id <span style="color: #ff9e64;">}</span>, item<span style="color: #7aa2f7;">)</span>;
+<span style="color: #a9b1d6;">}</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org09b83a2" class="outline-2">
+<h2 id="org09b83a2"><span class="section-number-2">8.</span> User Action</h2>
+<div class="outline-text-2" id="text-8">
+<ul class="org-ul">
+<li>Đặt vật phẩm vào Kiosk: Thêm một vật phẩm vào Kiosk.</li>
+<li>Lấy vật phẩm từ Kiosk: Loại bỏ một vật phẩm từ Kiosk.</li>
+<li>Mượn vật phẩm (có thể thay đổi): Tạm thời sử dụng một vật phẩm từ Kiosk với khả năng sửa đổi nó.</li>
+<li>Mượn vật phẩm (không thể thay đổi): Tạm thời sử dụng một vật phẩm từ Kiosk mà không thể thay đổi nó.</li>
+<li>Niêm yết vật phẩm để bán và hủy niêm yết: Đưa/loại bỏ một vật phẩm ra khỏi danh sách bán trên mạng lưới Kiosk.</li>
+<li>Mua một món hàng đang được bày bán từ bất kỳ Kiosk nào trong mạng lưới: Mua một món hàng đang được niêm yết để bán.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgfef0253" class="outline-2">
+<h2 id="orgfef0253"><span class="section-number-2">9.</span> Item States</h2>
+<div class="outline-text-2" id="text-9">
+<ul class="org-ul">
+<li>PLACED:
+<ul class="org-ul">
+<li>Vật phẩm được đặt vào Kiosk bằng chức năng "place".</li>
+<li>Kiosk Onwer (KO) có thể lấy lại (take), nhưng cũng có thể mượn (borrow) (với khả năng thay đổi) hoặc niêm yết để bán (list)</li>
+</ul></li>
+<li>LOCKED:
+<ul class="org-ul">
+<li>Vật phẩm được đặt với tính năng "lock"</li>
+<li>KO không thể lấy vật phẩm đã bị khóa ra khỏi Kiosk, nhưng có thể mượn (với khả năng thay đổi) hoặc niêm yết để bán</li>
+</ul></li>
+<li>LISTED:
+<ul class="org-ul">
+<li>Vật phẩm được niêm yết để bán bằng chức năng "list"</li>
+<li>KO chỉ có thể mượn vật phẩm (không thay đổi được) hoặc hủy niêm yết.</li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgefdd4c6" class="outline-2">
+<h2 id="orgefdd4c6"><span class="section-number-2">10.</span> Summary</h2>
+<div class="outline-text-2" id="text-10">
+<ul class="org-ul">
+<li>Kiosk là một nơi lưu giữ các vật phẩm sưu tầm được chia sẻ giữa mọi người.</li>
+<li>Kiosk có một chủ sở hữu duy nhất, được đại diện bởi quyền KioskOwnerCap.</li>
+<li>Chủ Kiosk (KO) có toàn quyền kiểm soát Kiosk của họ.</li>
+<li>Một món hàng đang được niêm yết có thể được mua bởi bất kỳ ai.</li>
+<li>Một vật phẩm vẫn có thể được mượn khi đang được niêm yết để bán (nhưng chỉ ở dạng không thể thay đổi).</li>
+<li>Vật phẩm có thể bị "khóa" trong Kiosk, không cho phép ai "lấy" chúng.</li>
+<li>Đối với các hành động có nhiều bên tham gia, các sự kiện sẽ được phát ra để mọi người có thể nhận biết.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Dang Quang Vu</p>
+<p class="date">Created: 2024-03-23 Sat 20:25</p>
+</div>
+</body>
+</html>
